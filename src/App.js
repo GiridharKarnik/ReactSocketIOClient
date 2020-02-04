@@ -1,24 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import Message from "./components/Message";
+import io from "socket.io-client";
+
+import { message as alert } from "antd";
+
+import "./App.scss";
+
+const url = "http://localhost:8080";
+const socket = io(url);
+
+socket.on("connect", function() {
+  alert.info(`Connected to socket server at ${url}`);
+});
+
+socket.on("disconnect", function(data) {
+  alert.error("Disconnected from socket server");
+});
 
 function App() {
+  const [response, setResponse] = useState("");
+
+  socket.on("message", function(data) {
+    console.log("response from server");
+    setResponse(data);
+  });
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Message socket={socket}/>
+
+      <div className="response">
+        <p>{response}</p>
+      </div>
     </div>
   );
 }
